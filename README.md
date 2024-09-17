@@ -4,9 +4,9 @@
 
 Maze Game is an exciting 3D-like maze exploration game implemented in C using the SDL2 library. This project showcases the power of raycasting techniques to create immersive environments from simple 2D maps.
 
-[Visit the deployed site](https://your-maze-game-url.com) | [Read the project blog article](https://hashnode.com/edit/cm16lbnk8001008jqfc5v2gn9)
+[Visit the deployed site](https://your-maze-game-url.com) | [Read the project blog article](https://hashnode.com/post/cm16lbnk8001008jqfc5v2gn9)
 
-**Author:** [Your Name](https://www.linkedin.com/in/abdul-ben-charles)
+**Author:** [Ben Charles Abdul](https://www.linkedin.com/in/abdul-ben-charles)
 
 ![Maze Game Screenshot](https://github.com/jackiejoe45/maze_game/blob/main/maze_game_logo.png)
 ![Maze Game Screenshot](https://github.com/jackiejoe45/maze_game/blob/main/maze_game_gameplay.png)
