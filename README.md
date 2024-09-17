@@ -8,8 +8,9 @@ Maze Game is an exciting 3D-like maze exploration game implemented in C using th
 
 **Author:** [Your Name](https://www.linkedin.com/in/abdul-ben-charles)
 
+![Maze Game Screenshot](https://github.com/jackiejoe45/maze_game/blob/main/maze_game_logo.png)
 ![Maze Game Screenshot](https://github.com/jackiejoe45/maze_game/blob/main/maze_game_gameplay.png)
-![Maze Game Screenshot](https://github.com/jackiejoe45/maze_game/blob/main/logo.png)
+
 
 ## Features
 
