@@ -1,8 +1,8 @@
 #include "main.h"
 
-void movePlayer(int direction) {
-    double moveX = dirX * MOVE_SPEED;
-    double moveY = dirY * MOVE_SPEED;
+void movePlayer(int direction, double speed) {
+    double moveX = dirX * speed;
+    double moveY = dirY * speed;
     
     if (direction == 1 || direction == -1) { // Forward or Backward
         double newPosX = posX + moveX * direction;
@@ -12,8 +12,8 @@ void movePlayer(int direction) {
         if(worldMap[(int)posX][(int)newPosY] == 0) posY = newPosY;
     }
     if (direction == 2 || direction == -2) { // Strafe Right or Left
-        double strafeX = -dirY * MOVE_SPEED * (direction / 2);
-        double strafeY = dirX * MOVE_SPEED * (direction / 2);
+        double strafeX = -dirY * speed * (direction / 2);
+        double strafeY = dirX * speed * (direction / 2);
         
         double newPosX = posX + strafeX;
         double newPosY = posY + strafeY;
@@ -23,21 +23,21 @@ void movePlayer(int direction) {
     }
 }
 
-void rotateCamera(int direction) {
+void rotateCamera(int direction, double speed) {
     double oldDirX = dirX;
     double oldPlaneX = planeX;
     
     if (direction == 1) { // Right rotation
-        dirX = dirX * cos(-ROT_SPEED) - dirY * sin(-ROT_SPEED);
-        dirY = oldDirX * sin(-ROT_SPEED) + dirY * cos(-ROT_SPEED);
-        planeX = planeX * cos(-ROT_SPEED) - planeY * sin(-ROT_SPEED);
-        planeY = oldPlaneX * sin(-ROT_SPEED) + planeY * cos(-ROT_SPEED);
+        dirX = dirX * cos(-speed) - dirY * sin(-speed);
+        dirY = oldDirX * sin(-speed) + dirY * cos(-speed);
+        planeX = planeX * cos(-speed) - planeY * sin(-speed);
+        planeY = oldPlaneX * sin(-speed) + planeY * cos(-speed);
     }
     if (direction == -1) { // Left rotation
-        dirX = dirX * cos(ROT_SPEED) - dirY * sin(ROT_SPEED);
-        dirY = oldDirX * sin(ROT_SPEED) + dirY * cos(ROT_SPEED);
-        planeX = planeX * cos(ROT_SPEED) - planeY * sin(ROT_SPEED);
-        planeY = oldPlaneX * sin(ROT_SPEED) + planeY * cos(ROT_SPEED);
+        dirX = dirX * cos(speed) - dirY * sin(speed);
+        dirY = oldDirX * sin(speed) + dirY * cos(speed);
+        planeX = planeX * cos(speed) - planeY * sin(speed);
+        planeY = oldPlaneX * sin(speed) + planeY * cos(speed);
     }
 }
 
@@ -112,4 +112,21 @@ int loadMap(const char *filename) {
 
     fclose(file);
     return 1;
+}
+SDL_Texture* loadTexture(const char* file, SDL_Renderer* renderer) {
+    SDL_Surface* surface = SDL_LoadBMP(file);
+    if (surface == NULL) {
+        printf("Error loading texture file '%s': %s\n", file, SDL_GetError());
+        return NULL;
+    }
+    
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture == NULL) {
+        printf("Error creating texture from '%s': %s\n", file, SDL_GetError());
+        SDL_FreeSurface(surface);
+        return NULL;
+    }
+    
+    SDL_FreeSurface(surface);
+    return texture;
 }

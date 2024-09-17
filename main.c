@@ -4,10 +4,12 @@ double posX = 4, posY = 4;
 double dirX = -1, dirY = 0;
 double planeX = 0, planeY = 0.66;
 
-const double MOVE_SPEED = 0.05;
-const double ROT_SPEED = 0.03;
+const double MOVE_SPEED = 0.50;
+const double ROT_SPEED = 0.50;
 
 int worldMap[MAP_WIDTH][MAP_HEIGHT] = {0};  // Initialize to 0
+
+SDL_Texture* wallTexture = NULL;
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -40,13 +42,30 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+// Load wall texture
+    const char* textureFile = "wall_texture.bmp";
+    wallTexture = loadTexture(textureFile, renderer);
+    if (wallTexture == NULL) {
+        printf("Failed to load wall texture '%s'!\n", textureFile);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
     bool quit = false;
     SDL_Event e;
     bool showMap = true;
 
+    Uint32 lastTime = SDL_GetTicks();
+    double frameTime;
+
     bool moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false, rotateLeft = false, rotateRight = false;
 
     while (!quit) {
+        Uint32 currentTime = SDL_GetTicks();
+        frameTime = (currentTime - lastTime) / 1000.0;
+        lastTime = currentTime;
+
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
                 quit = true;
@@ -54,8 +73,8 @@ int main(int argc, char *argv[]) {
                 switch (e.key.keysym.sym) {
                     case SDLK_w: moveForward = true; break;
                     case SDLK_s: moveBackward = true; break;
-                    case SDLK_a: strafeLeft = true; break;
-                    case SDLK_d: strafeRight = true; break;
+                    case SDLK_d: strafeLeft = true; break;
+                    case SDLK_a: strafeRight = true; break;
                     case SDLK_LEFT: rotateLeft = true; break;
                     case SDLK_RIGHT: rotateRight = true; break;
                     case SDLK_m: showMap = !showMap; break;
@@ -64,24 +83,33 @@ int main(int argc, char *argv[]) {
                 switch (e.key.keysym.sym) {
                     case SDLK_w: moveForward = false; break;
                     case SDLK_s: moveBackward = false; break;
-                    case SDLK_a: strafeLeft = false; break;
-                    case SDLK_d: strafeRight = false; break;
+                    case SDLK_d: strafeLeft = false; break;
+                    case SDLK_a: strafeRight = false; break;
                     case SDLK_LEFT: rotateLeft = false; break;
                     case SDLK_RIGHT: rotateRight = false; break;
                 }
             }
         }
 
-        // Handle multi-directional movement
-        if (moveForward && !moveBackward) movePlayer(1);
-        if (moveBackward && !moveForward) movePlayer(-1);
-        if (strafeRight && !strafeLeft) movePlayer(2);
-        if (strafeLeft && !strafeRight) movePlayer(-2);
-        if (rotateRight && !rotateLeft) rotateCamera(1);
-        if (rotateLeft && !rotateRight) rotateCamera(-1);
+        // Handle multi-directional movement with frame-independent speed
+        double moveSpeed = MOVE_SPEED * frameTime;
+        double rotSpeed = ROT_SPEED * frameTime;
 
-        SDL_SetRenderDrawColor(renderer, 86, 171, 0, 255);
+        if (moveForward && !moveBackward) movePlayer(1, moveSpeed);
+        if (moveBackward && !moveForward) movePlayer(-1, moveSpeed);
+        if (strafeRight && !strafeLeft) movePlayer(2, moveSpeed);
+        if (strafeLeft && !strafeRight) movePlayer(-2, moveSpeed);
+        if (rotateRight && !rotateLeft) rotateCamera(1, rotSpeed);
+        if (rotateLeft && !rotateRight) rotateCamera(-1, rotSpeed);
+
+        // Clear the screen
+        SDL_SetRenderDrawColor(renderer, 135, 206, 235, 255);  // Sky blue
         SDL_RenderClear(renderer);
+
+        // Draw the ground
+        SDL_Rect groundRect = {0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2};
+        SDL_SetRenderDrawColor(renderer, 34, 139, 34, 255);  // Forest green
+        SDL_RenderFillRect(renderer, &groundRect);
 
         for(int x = 0; x < SCREEN_WIDTH; x++) {
             double cameraX = 2 * x / (double)SCREEN_WIDTH - 1;
@@ -139,13 +167,23 @@ int main(int argc, char *argv[]) {
             int drawEnd = lineHeight / 2 + SCREEN_HEIGHT / 2;
             if(drawEnd >= SCREEN_HEIGHT) drawEnd = SCREEN_HEIGHT - 1;
 
-            if (side == 0) {
-                SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255);  // Red for EAST-WEST walls
-            } else {
-                SDL_SetRenderDrawColor(renderer, 169, 169, 169, 255);  // Blue for NORTH-SOUTH walls
-            }
+            // Texture mapping
+            double wallX;
+            if (side == 0) wallX = posY + perpWallDist * rayDirY;
+            else           wallX = posX + perpWallDist * rayDirX;
+            wallX -= floor(wallX);
 
-            SDL_RenderDrawLine(renderer, x, drawStart, x, drawEnd);
+            int texX = (int)(wallX * TEXTURE_WIDTH);
+            if(side == 0 && rayDirX > 0) texX = TEXTURE_WIDTH - texX - 1;
+            if(side == 1 && rayDirY < 0) texX = TEXTURE_WIDTH - texX - 1;
+
+            double step = 1.0 * TEXTURE_HEIGHT / lineHeight;
+            double texPos = (drawStart - SCREEN_HEIGHT / 2 + lineHeight / 2) * step;
+
+            SDL_Rect src = {texX, 0, 1, TEXTURE_HEIGHT};
+            SDL_Rect dest = {x, drawStart, 1, drawEnd - drawStart};
+
+            SDL_RenderCopy(renderer, wallTexture, &src, &dest);
         }
 
         drawMap(renderer, showMap);
@@ -153,6 +191,7 @@ int main(int argc, char *argv[]) {
         SDL_RenderPresent(renderer);
     }
 
+    SDL_DestroyTexture(wallTexture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
