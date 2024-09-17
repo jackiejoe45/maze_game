@@ -7,32 +7,37 @@ double planeX = 0, planeY = 0.66;
 const double MOVE_SPEED = 0.50;
 const double ROT_SPEED = 0.50;
 
-int worldMap[MAP_WIDTH][MAP_HEIGHT] = {0};  // Initialize to 0
+int worldMap[MAP_WIDTH][MAP_HEIGHT] = {0};  /* Initialize to 0 */
 
-SDL_Texture* wallTexture = NULL;
+SDL_Texture *wallTexture = NULL;
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Usage: %s <map_file>\n", argv[0]);
-        return 1;
-    }
-
-    if (!loadMap(argv[1])) {
-        printf("Failed to load map file.\n");
-        return 1;
-    }
-
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
-
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    window = SDL_CreateWindow("Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    if (window == NULL) {
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+int main(int argc, char *argv[]) 
+{
+	if (argc != 2) 
+	{
+		printf("Usage: %s <map_file>\n", argv[0]);
+		return (1);
+	}
+	
+	if (!loadMap(argv[1])) 
+	{
+		printf("Failed to load map file.\n");
+		return (1);
+	}
+	
+	SDL_Window *window = NULL;
+	SDL_Renderer *renderer = NULL;
+	
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) 
+	{
+		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+		return (1);
+	}
+	
+	window = SDL_CreateWindow("Raycaster", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (window == NULL)
+	{
+      printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
 
@@ -115,7 +120,7 @@ int main(int argc, char *argv[]) {
             double cameraX = 2 * x / (double)SCREEN_WIDTH - 1;
             double rayDirX = dirX + planeX * cameraX;
             double rayDirY = dirY + planeY * cameraX;
-            
+
             int mapX = (int)posX;
             int mapY = (int)posY;
 
