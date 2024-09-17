@@ -12,17 +12,14 @@
 #define MAP_HEIGHT 8
 #define MAP_SCALE 4
 
-// main.h
 extern int worldMap[MAP_HEIGHT][MAP_WIDTH];
 extern double posX, posY, dirX, dirY, planeX, planeY;
 extern const double MOVE_SPEED;
 extern const double ROT_SPEED;
 
-
 void movePlayer(int direction);
 void rotateCamera(int direction);
 void drawMap(SDL_Renderer *renderer, bool showMap);
+int loadMap(const char *filename);
 
 #endif // MAIN_H
-
-

@@ -7,19 +7,19 @@ double planeX = 0, planeY = 0.66;
 const double MOVE_SPEED = 0.05;
 const double ROT_SPEED = 0.03;
 
-
-int worldMap[MAP_WIDTH][MAP_HEIGHT] = {
-	{1,1,1,1,1,1,1,1},
-	{1,0,0,0,0,0,0,1},
-	{1,0,1,1,0,0,0,1},
-	{1,0,0,1,1,0,1,1},
-	{1,1,0,0,0,0,0,1},
-	{1,0,0,1,1,1,1,1},
-	{1,0,0,0,0,0,0,1},
-	{1,1,1,1,1,1,1,1}
-};
+int worldMap[MAP_WIDTH][MAP_HEIGHT] = {0};  // Initialize to 0
 
 int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage: %s <map_file>\n", argv[0]);
+        return 1;
+    }
+
+    if (!loadMap(argv[1])) {
+        printf("Failed to load map file.\n");
+        return 1;
+    }
+
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 
@@ -44,40 +44,43 @@ int main(int argc, char *argv[]) {
     SDL_Event e;
     bool showMap = true;
 
+    bool moveForward = false, moveBackward = false, strafeLeft = false, strafeRight = false, rotateLeft = false, rotateRight = false;
+
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
             if (e.type == SDL_QUIT) {
                 quit = true;
             } else if (e.type == SDL_KEYDOWN) {
                 switch (e.key.keysym.sym) {
-                    case SDLK_UP:
-                    case SDLK_w:
-                        movePlayer(1);
-                        break;
-                    case SDLK_DOWN:
-                    case SDLK_s:
-                        movePlayer(-1);
-                        break;
-                    case SDLK_RIGHT:
-                        rotateCamera(1);
-                        break;
-                    case SDLK_LEFT:
-                        rotateCamera(-1);
-                        break;
-                    case SDLK_d:
-                        movePlayer(2);
-                        break;
-                    case SDLK_a:
-                        movePlayer(-2);
-                        break;
-                    case SDLK_m:
-                        showMap = !showMap;
-                        break;
+                    case SDLK_w: moveForward = true; break;
+                    case SDLK_s: moveBackward = true; break;
+                    case SDLK_a: strafeLeft = true; break;
+                    case SDLK_d: strafeRight = true; break;
+                    case SDLK_LEFT: rotateLeft = true; break;
+                    case SDLK_RIGHT: rotateRight = true; break;
+                    case SDLK_m: showMap = !showMap; break;
+                }
+            } else if (e.type == SDL_KEYUP) {
+                switch (e.key.keysym.sym) {
+                    case SDLK_w: moveForward = false; break;
+                    case SDLK_s: moveBackward = false; break;
+                    case SDLK_a: strafeLeft = false; break;
+                    case SDLK_d: strafeRight = false; break;
+                    case SDLK_LEFT: rotateLeft = false; break;
+                    case SDLK_RIGHT: rotateRight = false; break;
                 }
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 86, 171,0, 255);
+        // Handle multi-directional movement
+        if (moveForward && !moveBackward) movePlayer(1);
+        if (moveBackward && !moveForward) movePlayer(-1);
+        if (strafeRight && !strafeLeft) movePlayer(2);
+        if (strafeLeft && !strafeRight) movePlayer(-2);
+        if (rotateRight && !rotateLeft) rotateCamera(1);
+        if (rotateLeft && !rotateRight) rotateCamera(-1);
+
+        SDL_SetRenderDrawColor(renderer, 86, 171, 0, 255);
         SDL_RenderClear(renderer);
 
         for(int x = 0; x < SCREEN_WIDTH; x++) {

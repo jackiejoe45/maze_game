@@ -84,3 +84,32 @@ void drawMap(SDL_Renderer *renderer, bool showMap) {
         mapOffsetY + (int)((posY + dirY) * MAP_SCALE)
     );
 }
+
+int loadMap(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file: %s\n", filename);
+        return 0;
+    }
+
+    char line[MAP_WIDTH + 2];  // +2 for newline and null terminator
+    int y = 0;
+
+    while (fgets(line, sizeof(line), file) && y < MAP_HEIGHT) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            if (line[x] == '#') {
+                worldMap[x][y] = 1;  // Wall
+            } else if (line[x] == '.') {
+                worldMap[x][y] = 0;  // Empty space
+            } else {
+                printf("Invalid character in map file: %c\n", line[x]);
+                fclose(file);
+                return 0;
+            }
+        }
+        y++;
+    }
+
+    fclose(file);
+    return 1;
+}
